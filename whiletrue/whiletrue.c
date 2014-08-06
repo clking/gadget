@@ -9,8 +9,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define DEBUG
-
 #ifdef DEBUG
   #define debug(fmt, ...) printf("[DEBUG] " fmt "\n", ##__VA_ARGS__)
 #else

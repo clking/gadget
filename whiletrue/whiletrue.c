@@ -61,7 +61,7 @@ display_time(time_t t, char *ts) {
 }
 
 void
-on_exit() {
+_on_exit() {
     debug("terminating child on exit");
     if (child_pid)
         kill(child_pid, SIGINT);
@@ -80,7 +80,7 @@ main(int argc, char **argv) {
 
     signal(SIGINT, interrupted);
     signal(SIGTERM, terminate_child);
-    atexit(on_exit);
+    atexit(_on_exit);
 
     args = (char **)malloc(argc - 1);
     for (int i = 1 ; i < argc ; ++i)

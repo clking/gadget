@@ -6,8 +6,11 @@
 #include <string.h>
 #include <time.h>
 
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#define SHELL "/bin/sh"
 
 #ifdef DEBUG
   #define debug(fmt, ...) printf("[DEBUG] " fmt "\n", ##__VA_ARGS__)
@@ -18,11 +21,6 @@
 extern char **environ;
 pid_t child_pid;
 time_t last_interrupted;
-
-void
-usage(char* process) {
-    printf("Usage: %s program\n", process);
-}
 
 void
 interrupted(int signal) {
@@ -44,9 +42,31 @@ interrupted(int signal) {
 
 void
 terminate_child(int signal) {
-    debug("terminating child");
-    if (child_pid)
+    if (child_pid) {
+        debug("terminating child %d", child_pid);
+        kill(child_pid, SIGTERM);
+    }
+}
+
+void
+usage(char* process) {
+    printf("Usage: %s program\n", process);
+}
+
+void
+_on_exit() {
+    debug("executing normal termination process");
+    if (child_pid) {
+        debug("terminating child on exit");
         kill(child_pid, SIGINT);
+    }
+}
+
+void
+register_event_hooks() {
+    signal(SIGINT, interrupted);
+    signal(SIGHUP, terminate_child);
+    atexit(_on_exit);
 }
 
 void
@@ -61,16 +81,23 @@ display_time(time_t t, char *ts) {
 }
 
 void
-_on_exit() {
-    debug("terminating child on exit");
-    if (child_pid)
-        kill(child_pid, SIGINT);
+build_shell_command(char **args, int argc, char **argv) {
+    args[0] = SHELL;
+    args[1] = "-c";
+    args[2] = (char *)malloc(BUFSIZ);
+    args[3] = NULL;
+    bzero(args[2], BUFSIZ);
+    for (int i = 1 ; i < argc ; ++i) {
+        args[2][strlen(args[2])] = ' ';
+        strcat(args[2], argv[i]);
+    }
+    ++args[2];
 }
 
 int
 main(int argc, char **argv) {
     char ts[512];
-    char **args;
+    char *args[4];
     int child_status;
 
     if (argc < 2) {
@@ -78,28 +105,22 @@ main(int argc, char **argv) {
         return EX_DATAERR;
     }
 
-    signal(SIGINT, interrupted);
-    signal(SIGTERM, terminate_child);
-    atexit(_on_exit);
+    register_event_hooks();
 
-    args = (char **)malloc(argc - 1);
-    for (int i = 1 ; i < argc ; ++i)
-        args[i - 1] = argv[i];
+    build_shell_command(args, argc, argv);
+    debug("running: %s %s %s", args[0], args[1], args[2]);
 
-    for (int i = 0 ; i < argc - 1 ; ++i)
-        debug("%s", args[i]);
-
-    while (1) {
+    for ( ; ; ) {
         display_time(time(NULL), ts);
         printf("%s > %s\n", ts, args[0]);
 
         child_pid = fork();
         if (child_pid) {
             wait(&child_status);
-            debug("child status %d", child_status);
         } else {
             execvp(args[0], args);
-            debug("child never done");
+            debug("child never done %d", errno);
+            exit(errno); /* should never be reached */
         }
 
         child_pid = 0;

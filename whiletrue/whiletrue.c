@@ -44,7 +44,7 @@ void
 terminate_child(int signal) {
     if (child_pid) {
         debug("terminating child %d", child_pid);
-        kill(child_pid, SIGTERM);
+        kill(child_pid, signal);
     }
 }
 
@@ -58,7 +58,7 @@ _on_exit() {
     debug("executing normal termination process");
     if (child_pid) {
         debug("terminating child on exit");
-        kill(child_pid, SIGINT);
+        kill(child_pid, SIGTERM);
     }
 }
 

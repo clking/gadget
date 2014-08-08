@@ -70,14 +70,14 @@ register_event_hooks() {
 }
 
 void
-display_time(time_t t, char *ts) {
+display_time(time_t t, char *ts, size_t len) {
     struct tm *tp;
 
     if (!t)
         t = time(NULL);
     tp = localtime(&t);
 
-    strftime(ts, 512, "%F %T", tp);
+    strftime(ts, len, "%F %T", tp);
 }
 
 void
@@ -96,7 +96,7 @@ build_shell_command(char **args, int argc, char **argv) {
 
 int
 main(int argc, char **argv) {
-    char ts[512];
+    char ts[32];
     char *args[4];
     int child_status;
 
@@ -111,7 +111,7 @@ main(int argc, char **argv) {
     debug("running: %s %s %s", args[0], args[1], args[2]);
 
     for ( ; ; ) {
-        display_time(time(NULL), ts);
+        display_time(time(NULL), ts, sizeof(ts));
         printf("%s > %s\n", ts, args[0]);
 
         child_pid = fork();

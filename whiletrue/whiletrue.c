@@ -112,7 +112,7 @@ main(int argc, char **argv) {
 
     for ( ; ; ) {
         display_time(time(NULL), ts, sizeof(ts));
-        printf("%s > %s\n", ts, args[0]);
+        printf("%s > %s\n", ts, args[2]);
 
         child_pid = fork();
         if (child_pid) {

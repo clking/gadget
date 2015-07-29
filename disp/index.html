@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>好毒頁</title>
+    <link rel="stylesheet" href="disp.css" />
+    <script src="uao.js"></script>
+    <script src="sites.js"></script>
+    <script src="disp.js"></script>
+  </head>
+  <body onload="init(event);">
+    <div id="heading">
+      <div class="tbar">
+	<span class="hdtitle">作者</span>
+	<span id="author" class="hdtext"></span>
+	<span id="board" class="hdtext ralign"></span>
+	<span id="btitle" class="hdtitle ralign">看板</span>
+      </div>
+      <div class="tbar">
+	<span class="hdtitle">標題</span>
+	<span id="atitle" class="hdtext"></span>
+      </div>
+      <div class="tbar">
+	<span class="hdtitle" style="padding-bottom: 4px;">時間</span>
+        <span id="atime" class="hdtext"></span>
+      </div>
+      <div class="ruler"></div>
+    </div>
+    <div id="content"></div>
+    <div id="source">
+      <div><textarea id="srctext" rows="25" cols="80"></textarea></div>
+      <div>
+	  <button id="doku" type="button" onclick="disp();" accesskey="z">毒</button>
+	  <input type="checkbox" id="shrink" value="1" onclick="zoom();" accesskey="a" title="圖片超出畫面寬度時等比例縮放至畫面大小" /><label for="shrink" title="圖片超出畫面寬度時等比例縮放至畫面大小">縮</label>
+      </div>
+    </div>
